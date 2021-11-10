@@ -1,0 +1,38 @@
+package com.sist.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+
+import com.sist.vo.OrderBookCustomerVO;
+
+public class OrdersBookCustomerDAO {
+	
+	String driver="oracle.jdbc.";
+	String url="";
+	String user="c##madang";
+	String pwd= "madang";
+	
+	public ArrayList<OrderBookCustomerVO> listOrders(String name){
+		ArrayList<OrderBookCustomerVO> list= new ArrayList<OrderBookCustomerVO>();
+		String sql="select c.custid, name, bookname, publisher, price, saleprice, orderdate from book b, orders o, customer c where b.bookid= o.bookid and o.custid=c.custid and name=? order by price desc";
+		Connection conn= null;
+		PreparedStatement pstmt=null;
+		ResultSet rs= null;
+		try {
+			Class.forName(driver);
+		} catch (Exception e) {
+			System.out.println("예외발생: "+e.getMessage());
+		}finally {
+		try {
+			
+		} catch (Exception e2) {
+			System.out.println("예외발생: "+e2.getMessage());
+		}	
+		}
+		
+		
+		return list;
+	}
+}

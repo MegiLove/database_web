@@ -1,0 +1,12 @@
+package com.sist.dao;
+
+import java.util.ArrayList;
+
+import com.sist.vo.BookVO;
+
+public class BookDAO {
+	public ArrayList<BookVO> searchBook(int price){
+		ArrayList<BookVO> list= new ArrayList<BookVO>();
+		return list; 
+	}
+}

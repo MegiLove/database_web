@@ -1,0 +1,105 @@
+package com.sist.vo;
+
+import java.util.Date;
+
+public class EmpVO {
+private int eno;
+private String ename;
+private int dno;
+private int salary;
+private int comm;
+private int total;
+private Date hirdate;
+private String phone;
+private String addr;
+private int mgr;
+private String job;
+
+public EmpVO(int eno, String ename, int dno, int salary, int comm, int total, Date hirdate, String phone, String addr,
+		int mgr, String job) {
+	super();
+	this.eno = eno;
+	this.ename = ename;
+	this.dno = dno;
+	this.salary = salary;
+	this.comm = comm;
+	this.total = total;
+	this.hirdate = hirdate;
+	this.phone = phone;
+	this.addr = addr;
+	this.mgr = mgr;
+	this.job = job;
+}
+public EmpVO() {
+	super();
+	// TODO Auto-generated constructor stub
+}
+public int getEno() {
+	return eno;
+}
+public void setEno(int eno) {
+	this.eno = eno;
+}
+public String getEname() {
+	return ename;
+}
+public void setEname(String ename) {
+	this.ename = ename;
+}
+public int getDno() {
+	return dno;
+}
+public void setDno(int dno) {
+	this.dno = dno;
+}
+public int getSalary() {
+	return salary;
+}
+public void setSalary(int salary) {
+	this.salary = salary;
+}
+public int getComm() {
+	return comm;
+}
+public void setComm(int comm) {
+	this.comm = comm;
+}
+public int getTotal() {
+	return total;
+}
+public void setTotal(int total) {
+	this.total = total;
+}
+public Date getHirdate() {
+	return hirdate;
+}
+public void setHirdate(Date hirdate) {
+	this.hirdate = hirdate;
+}
+public String getPhone() {
+	return phone;
+}
+public void setPhone(String phone) {
+	this.phone = phone;
+}
+public String getAddr() {
+	return addr;
+}
+public void setAddr(String addr) {
+	this.addr = addr;
+}
+public int getMgr() {
+	return mgr;
+}
+public void setMgr(int mgr) {
+	this.mgr = mgr;
+}
+public String getJob() {
+	return job;
+}
+public void setJob(String job) {
+	this.job = job;
+}
+
+
+}

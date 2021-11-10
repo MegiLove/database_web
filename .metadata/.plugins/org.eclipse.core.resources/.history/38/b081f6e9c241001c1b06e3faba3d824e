@@ -1,0 +1,16 @@
+package com.sist.dao;
+
+import java.util.ArrayList;
+
+import com.sist.vo.OrderBookCustomerVO;
+
+public class OrdersBookCustomerDAO {
+	public ArrayList<OrderBookCustomerVO> listOrders(String name){
+		ArrayList<OrderBookCustomerVO> list= new ArrayList<OrderBookCustomerVO>();
+		String sql="select c.custid, name, bookname, publisher, price, saleprice, orderdate from book b, orders o, customer c where b.bookid= o.bookid and o.custid=c.custid and name=? order by price desc";
+
+		
+		
+		return list;
+	}
+}

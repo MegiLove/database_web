@@ -1,0 +1,18 @@
+package com.sist.dao;
+
+import java.util.ArrayList;
+
+import com.sist.vo.DeptVO;
+
+public class DeptDAO {
+	String driver="oracle.jdbc.driver.OracleDriver";
+	String url="jdbc:oracle:thin:@localhost:1521:XE";
+	String user="c##madang";
+	String pwd= "madang";
+	
+	public ArrayList<DeptVO> searchEmp(){
+		ArrayList<DeptVO> list= new ArrayList<DeptVO>();
+		
+		return list;
+	}
+}

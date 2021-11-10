@@ -1,0 +1,15 @@
+package com.sist.dao;
+
+import java.util.Date;
+
+public class OrderBookCustomerVO {
+	private int custid;
+	private String name;
+	private String bookname;
+	private String publisher;
+	private int price;
+	private int saleprice;
+	private Date orderdate;
+	
+	
+}
