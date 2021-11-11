@@ -1,6 +1,6 @@
-<%@page import="com.sist.vo.OrderBookCustomerVO"%>
+<%@page import="com.sist.vo.BookNameVO"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="com.sist.dao.OrdersBookCustomerDAO"%>
+<%@page import="com.sist.dao.BookNameDAO"%>
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
 	pageEncoding="EUC-KR"%>
 <!DOCTYPE html>
@@ -16,11 +16,13 @@
 	</form>
 
 	<%
-	request.setCharacterEncoding("euc-kr");
-	if (request.getParameter("name") != null) {
+	p
+
+			request.setCharacterEncoding("euc-kr");
+			if (request.getParameter("name") != null) {
 		String name = request.getParameter("name");
-		OrdersBookCustomerDAO dao = new OrdersBookCustomerDAO();
-		ArrayList<OrderBookCustomerVO> list = dao.listOrders(name);
+		BookNameDAO dao = new BookNameDAO();
+		ArrayList<BookNameVO> list = dao.listOrders(name);
 		int total= dao.getTotalSalePrice(name);
 	%>
 	<table border="1" width="80%">
@@ -34,7 +36,9 @@
 			<td>∆«∏≈¿œ</td>
 		</tr>
 		<%
-		for (OrderBookCustomerVO o : list) {
+		p
+
+				for (BookNameVO o : list) {
 		%>
 		<tr>
 			<td><%=o.getCustid()%></td>

@@ -1,0 +1,252 @@
+출판사별로 출간하여 도서의 수 출력
+select publisher, count(*) from book group by publisher;
+
+group by절에 나타난 칼럼만이 select절에 올 수 있다(publisher는 가능)
+
+집계함수
+sum		총합
+avg		평균		
+max		최대값
+min		최소값
+count	개수
+
+==> 집계함수의 결과는 1건이다
+==> group by와 함께 집계함수를 사용
+		group by절에 사용한 칼럼의 값의 종류만큼 결과가 나온다
+		
+select count(*) from book;
+==> 결과가 1건
+
+select count(*) from book group by publisher;
+==> 결과가 publisher의 종류만큼 나온다
+COUNT(*)
+----------
+         4
+         1
+         2
+         2
+         1
+         1
+         1
+그러나 이렇게 하면 어느 출판사의 도서의 수인지는 알 수 없다
+
+왼쪽에 출판사이름을 써주는 게 좋겠다
+
+select publisher,count(*) from book group by publisher;
+PUBLISHER    COUNT(*)
+---------- ----------
+굿스포츠           4
+나무수             1
+대한미디어          2
+이상미디어          2
+삼성당             1
+Pearson          1
+쌍용미디어          1
+
+==> 그러니 집계함수를 사용할 때에는 group by절에 표현한 컬럼만이
+select 절에 올 수 있다. 그 이외의 컬럼은 올 수 없다
+
+select custid, count(*) from orders group by custid;
+
+select bookid, count(*) from orders group by bookid;
+
+select publisher, avg(price), max(price), min(price) from book group by publisher;
+
+select custid,avg(saleprice),max(saleprice) from orders group by custid;
+
+select orderdate,count(*), sum(saleprice) from orders group by orderdate;
+
+join과 함께 집계함수 group by 사용하기
+select name, count(*) from orders o, customer c where c.custid=o.custid group by name; 
+
+select bookname, count(*) from book b, orders o where b.bookid=o.bookid group by bookname;
+
+select publisher, count(*), sum(saleprice) from book b, orders o where b.bookid= o.bookid group by publisher;
+
+select name, sum(saleprice), avg(saleprice), count(*) from customer c, orders o where c.custid=o.custid group by name;
+
+having
+==> group by절에 의해 나타난 결과에 대하여 조건식을 부여할 때 사용한다
+
+select 칼럼, 집계함수,..
+from 테이블이름(들)
+where 조건식
+group by 칼럼
+having 조건식
+
+
+
+select name, count(*) from customer c, orders o, book b where c.custid= o.custid and 
+b.bookid=o.bookid and price>=8000 group by name having count(*)>=2;
+
+select publisher,count(*),sum(saleprice) from book b,orders o 
+where b.bookid=o.bookid and orderdate between '2021/11/01' and '2021/11/07'
+and bookname like '_구%' group by publisher having sum(saleprice)>=10000
+order by sum(saleprice) desc;
+
+select bookname,count(*) from book b, orders o where b.bookid=o.bookid and 
+publisher in ('이상미디어','대한미디어','굿스포츠') group by bookname
+having count(*)>=2 order by count(*) desc, bookname;
+
+select job, count(*), avg(salary) from dept d, emp e where d.dno=e.dno
+and dloc='서교동' group by job;
+
+select dname, count(*), avg(salary), sum(salary),max(salary),min(salary)
+from dept d, emp e where d.dno=e.dno and dname like '%개발%' group by dname
+having count(*)>=2 order by count(*) desc;
+
+insert into emp values(1014,'윤석열',20,null,null,sysdate,'010-0000-0001','서울',1005, '사원');
+
+select count(*) from emp;
+select count(salary) from emp;
+
+
+
+
+count(*) ==> 모든 레코드의 수를 알려준다
+count(컬럼이름) ==> 컬럼의 값이 null이 아닌 레코드의 수를 알려준다
+
+select avg(salary) from emp;
+전체레코드 개수를 나누기 하지 않고
+null이 아닌 개수로 나누기 한다
+
+**null인 경우에 특정한 값으로 변환 후에 출력
+nvl(컬럼이름, 값)
+
+**모든 사원의 이름과 급여를 출력(단, 급여가 null이면 0으로 출력)
+select ename, nvl(salary,0) from emp;
+
+select avg(salary) from emp;
+select avg(nvl(salary,0)) from emp;
+
+self join
+--> 동일한 테이블에서 어떤 칼럼이 자신의 다른 칼럼을 참조하는 경우에
+self join을 이용한다
+
+emp테이블의 경우 관리자번호인 mgr은 emp테이블의 eno를 참조하고 있다
+만약 사원이름과 관리자이름을 출력해야하는 경우라면 self join을 이용해야 한다
+self 조인을 하는 방법은 실제 물리적으로 테이블이 하나밖에 없으므로 그것을 각각
+애칭을 주어 join식에 표현할 수 있다
+
+select ~~
+from 테이블이름 애칭1, 테이블이름 애칭2
+where 조건식
+
+select e.ename,m.ename from emp e, emp m
+where e.mgr=m.eno;
+
+select m.ename from emp e, emp m
+where e.mgr= m.eno and e.ename='임상진';
+
+select e.eno,e.ename,d.dno,dname,m.ename,e.salary from emp e,emp m,dept d where e.mgr= m.eno 
+and e.dno=d.dno and dloc='서교동' order by e.salary desc,e.ename;
+
+select e.eno,e.ename,m.ename,e.hirdate,m.hirdate,e.dno,dname from emp e, emp m, dept d
+where e.mgr= m.eno and e.dno=d.dno and e.hirdate<m.hirdate order by dname,e.ename;
+
+select m.ename,count(*),sum(e.salary),avg(e.salary) from emp e, emp m,dept d
+where e.mgr=m.eno and e.dno=d.dno and dloc='서교동' group by m.ename;
+
+select m.ename, count(*), sum(e.salary), avg(e.salary) from emp e, emp m,dept d
+where e.mgr=m.eno and e.dno=d.dno and (dloc='서교동' or dloc='판교') group by m.ename
+having count(*)>=2;
+
+
+outer join
+	left outer join			왼쪽에 있는 테이블은 조건을 만족하지 않더라도 출력
+	right outer join		오른쪽에 있는 테이블은 조건을 만족하지 않더라도 출력
+	
+	select ~~ from 테이블1 left(right) outer join 테이블2 on 조건식 (where 안씀)
+	
+select name,count(saleprice),nvl(sum(saleprice),0),nvl(avg(saleprice),0) from customer 
+left outer join orders on customer.custid= orders.custid and address like '대한민국%'
+group by name order by count(saleprice) desc, sum(saleprice) desc;
+
+
+select name,count(saleprice),nvl(sum(saleprice),0),nvl(avg(saleprice),0) from customer 
+left outer join orders on customer.custid= orders.custid
+group by name order by count(saleprice) desc, sum(saleprice) desc;
+
+select e.ename,nvl(m.ename,'관리자없음') from emp e left outer join emp m on e.mgr= m.eno;
+
+NAME       COUNT(SALEPRICE) NVL(SUM(SALEPRICE),0) NVL(AVG(SALEPRICE),0)
+---------- ---------------- --------------------- ---------------------
+장미란                    3                 31000            10333.3333
+김연아                    2                 15000                  7500
+이재명                    1                 20000                 20000
+윤석열                    1                 14000                 14000
+박세리                    0                     0                     0
+박지성                    0                     0                     0
+추신수                    0                     0                     0
+
+==> 대한민국에 거주 하지 않는사람도 나온다--> 박지성, 추신수
+==> 대한민국에 거주는 하나 구매이력이 없는 사람만 나오게 하고 싶다--> 박세리
+
+서브쿼리(sub query), 하위질의
+==> sql을 만들어서 그것을 sql에 포함시키는 것을 말한다
+==> sql문에 포함되는 또다른 sql문을 말한다
+==> select절, from절, where절에 올 수 있다
+
+update할 때
+set 컬럼명= (서브쿼리)
+
+delete할 때
+where절에 올 수 있다
+
+select name,count(saleprice),nvl(sum(saleprice),0),nvl(avg(saleprice),0) from orders 
+right outer join (select custid, name from customer where address like '대한민국%') customer
+on customer.custid= orders.custid 
+group by name 
+order by count(saleprice) desc, nvl(sum(saleprice),0) desc;
+
+insert into book values(13, '재미있는 오라클', '쌍용미디어', 50000);
+
+
+select bookname, nvl(count(saleprice),0) from orders o right outer join book b
+on o.bookid=b.bookid group by bookname order by nvl(count(saleprice),0) desc;
+
+select dname, count(ename),nvl(avg(salary),0) from emp e right outer join dept d on d.dno=e.dno group by dname;
+
+select max(price) from book;
+
+select bookname from book where price=(select max(price) from book);
+
+select max(price) from book --> 건수가 1건
+
+select bookid from book where price=(select max(price) from book);
+
+select custid from orders where bookid=(select bookid from book where price=(select max(price) from book)); 
+==> 여러 건이 결과로 나온다 (1,6)
+
+select name from customer where custid in(select custid from orders where bookid=(select bookid from book where price=(select max(price) from book)));
+==> 고객번호가 1,6 두개로 이 때는 =을 쓸 수 없다
+이때는 in으로 한다
+
+select avg(salary) from emp;
+
+select e.eno,e.ename,m.ename, dname from emp e, emp m, dept d
+where e.mgr= m.eno and e.dno=d.dno and e.salary>(select avg(salary) from emp);
+
+
+
+select bookid from orders where custid=(select custid from customer where name='박지성'); 
+
+
+select distinct custid from orders where bookid in(select bookid from orders where custid=(select custid from customer where name='박지성'))
+
+select name from customer where custid in (select distinct custid from orders where bookid in
+(select bookid from orders where custid=(select custid from customer where name='박지성')))
+and name <> '박지성';
+
+select bookname from book where bookid not in (select bookid from orders where custid=(select custid from customer where name='박지성'));
+
+select bookname from book where bookid not in(select bookid from orders where custid=(select custid from customer where name=?));
+
+
+
+
+
+
+
+
+
