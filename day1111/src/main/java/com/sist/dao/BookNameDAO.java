@@ -31,7 +31,7 @@ public class BookNameDAO {
 			pstmt.setString(1, name);
 			rs=pstmt.executeQuery();
 			while(rs.next()) {
-				list.add(new BookNameVO(rs.getInt(1),rs.getString(2), rs.getString(3),rs.getString(4),rs.getInt(5),rs.getInt(6),rs.getDate(7)));
+				list.add(new BookNameVO(rs.getString(1)));
 			}
 		} catch (Exception e) {
 			System.out.println("예외발생: "+e.getMessage());

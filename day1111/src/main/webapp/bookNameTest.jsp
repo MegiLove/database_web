@@ -37,7 +37,7 @@
 		%>
 		<tr>
 			
-			<td><%=o.getBookname()%></td>
+			<td><%=o.getname()%></td>
 			
 		</tr>
 		<%
