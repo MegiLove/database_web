@@ -126,12 +126,11 @@ select dno, job, count(*)
 	group by dno,job
 	order by dno,job;
 
-20.	
-select dname from dept where dno not in(select distinct dno from emp);
+20.select dname from dept where dno not in(select distinct dno from emp);
 
 21. select job, count(*) from emp group by job having count(*)>=2;
 
-22. select ename from emp where salary>( select salary from emp where ename= '박지예' );
+22. select ename from emp where salary>( select salary from emp where ename= '박지예');
 	
 23.
 select dno from dept where dno=() or dno=();
