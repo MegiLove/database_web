@@ -14,10 +14,34 @@ public class NewBookDAO {
 	String user = "c##madang";
 	String pwd = "madang";
 
-	public ArrayList<NewBookVO> listBook(int bookid, String bookname, String publisher, int price) {
+	public ArrayList<NewBookVO> listBook() {
 		ArrayList<NewBookVO> list = new ArrayList<NewBookVO>();
-		String sql = "select ";
-
+		String sql = "select * from book";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs= null;
+		try {
+			Class.forName(driver);
+			conn= DriverManager.getConnection(url, user, pwd);
+			pstmt= conn.prepareStatement(sql);			
+			pstmt.executeQuery();
+		} catch (Exception e) {
+			System.out.println("예외발생: " + e.getMessage());
+		}finally {
+			try {
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (conn != null) {
+					conn.close();
+				}
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e2) {
+				System.out.println("예외발생: " + e2.getMessage());
+			}
+		}
 		return list;
 	}
 
