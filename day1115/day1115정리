@@ -1,0 +1,249 @@
+컬럼레벨에서 주식별자 설정하기
+create table dept(
+dno number primary key,
+dname varchar2(20),
+dloc varchar2(30)
+);
+
+
+테이블레벨에서 주식별자 설정하기
+create table dept(
+dno number,
+dname varchar2(20),
+dloc varchar2(30),
+primary key(dno) 
+);
+
+**두 개 이상의 속성이 합쳐져서 주식별자로 설정할 수 있다
+	테이블레벨에서만 가능하다
+create table dept(
+dname varchar2(20),
+dloc varchar2(30),
+tel varchar2(30),
+manager varchar2(20),
+primary key(dname,dloc) 
+);
+
+insert into dept values('영업팀','인천','032-1111-1111','홍길동');
+insert into dept values('영업팀','서울','02-1111-1111','이순신');
+insert into dept values('개발팀','서울','02-2222-2222','김유신');
+
+컬럼레벨에서 주식별자와 참조키 설정
+create table emp(
+eno number primary key,
+ename varchar2(20),
+salary number,
+dno number references dept(dno)
+);
+
+
+테이블레벨에서 주식별자와 참조키 설정
+create table emp(
+eno number,
+ename varchar2(20),
+salary number,
+dno number,
+primary key eno,
+foreign key dno references dept(dno) on delete cascade
+);
+
+위에 처럼 테이블을 생성하게 되면
+두 테이블은 부모자식 관계가 된다(주종관계)
+
+dept==> 부모테이블
+emp==>  자식테이블
+
+emp테이블은 dept테이블을 참조하고 있다
+
+참조키를 설정하는 칼럼은 반드시 부모테이블의 주식별자이어야 한다
+
+부모자식관계가 설정이 되어 있을때에 
+"부모테이블"을 함부로 삭제 할 수 없다.
+
+부모자식관계가 설정이 되어 있고
+테이블을 다시 생성해야 하는 상황이라면
+자식테이블을 먼저 삭제하고 부모테이블을 삭제할 수 있다
+
+또한 자식테이블에 먼저 레코드를 추가할 수 없다
+부모테이블에 먼저 레코드가 추가되어야 하고
+거기에 있는 dno를 갖고 emp에 추가할 수 있다
+
+insert into dept values(10,'기획팀', '서울시 마포구 서교동');
+insert into dept values(20,'영업팀', '서울시 마포구 서교동');
+insert into dept values(30,'개발팀', '판교');
+
+insert into emp values(1000,'홍길동',500,10);
+insert into emp values(1001,'이순신',400,20);
+insert into emp values(1002,'김유신',500,30);
+
+레코드의 수정, 삭제
+update 테이블이름 set 컬럼1=값1,,... where 조건식..
+update emp set dno=10 where dno=30;
+
+레코드의 삭제
+
+delete dept where dno=30;
+
+부모테이블에서 레코드를 삭제할 때에
+자식테이블에서 참조하고 있는 레코드들을 연쇄하여 삭제하고 싶다면
+테이블생성시에 on delete cascade
+
+ex) dept(dno) on delete cascade
+
+
+DDL
+create		테이블을 생성하는 명령어
+alter		테이블의 구조를 변경하는 명령어
+drop		테이블을 삭제하는 명령어
+
+**alter
+-이미 있는 테이블에 새로운 칼럼 추가
+alter table 테이블이름 add 추가할칼럼이름 자료형;
+==> 이미 레코드가 있는 상태에서 칼럼을 추가한다면 그 칼럼의 값은 null인 상태가 된다
+
+-이미 있는 테이블에 칼럼을 삭제
+alter table 테이블이름 drop column 칼럼이름
+
+-이미 있는 테이블에 칼럼의 자료형이나 제약을 변경
+alter table 테이블이름 modify 칼럼이름 새로운자료형
+
+-이미 있는 테이블의 primary key설정하기
+alter table 테이블명 modify 컬럼이름 자료형 not null
+alter table 테이블명 add primary key(컬럼이름)
+
+
+**테이블의 구조 변경하기
+- 새로운 컬럼을 추가
+alter table 테이블이름 add 컬럼이름 자료형 옵션
+alter table emp add addr varchar2(30);
+
+- 칼럼의 자료형 변경
+alter table 테이블이름 modify 컬럼이름 새로운자료형
+alter table dept modify dname number(30);
+
+- 칼럼삭제
+alter table 테이블이름 drop column 칼럼이름
+
+- pk추가
+alter table 테이름이름 add primary key(컬럼이름)
+		(단, 컬럼은 not null이어야 합니다)
+
+- fk추가 
+alter table 테이블이름 add foreign key(칼럼이름) references 부모테이블이름(칼럼이름)
+alter table emp add foreign key(dno) references dept(dno);
+
+
+
+
+insert into emp values();
+==> values의 값의 개수와 순서는 테이블의 구조와 동일해야 한다
+
+insert into emp() values();
+==> values의 값의 개수와 순서는 앞에서 나열한 칼럼의 순서와 동일해야 한다
+단, 나열한 칼럼 이외의 칼럼들은 null을 허용하거나 default값이 있어야 한다
+
+create table dept(
+dno number primary key,
+dname varchar2(20) not null,
+dloc varchar2(30) default '서교동',
+tel varchar2(30) null
+);
+
+insert into dept values(10,'기획팀','판교','031-1111-1111');
+insert into dept(dname,dno) values('개발팀',20);
+
+이미 있는 테이블의 구조만 복사하여 새로운 테이블을 생성
+create table 테이블이름 as select * from 테이블이름 where 만족하지 않을 조건;
+
+insert into 테이블명 select~~
+
+==> 테이블의 컬럼이름과 레코드는 복사가 되지만
+			제약은 복사가 되지 않는다
+			
+		필요하다면 제약을 alter 명령어에 의해서 추가해야 한다
+		
+자료의 삭제
+
+delete from 테이블이름 where 조건식
+
+DML명령어
+insert,update,delete를 수행한 후에는
+commit, rollback으로 명령어의 적용을 해줘야 한다
+
+commit 승인
+rollback 취소
+
+DML작업을 수행한 후에는 그 작업들이 올바르게 수행되었다면 commit
+잘못되었다면 rollback을 반드시 해줘야 한다
+
+DDL,DCL은 auto commit이다
+
+create table 극장(
+극장번호 number,
+극장이름 varchar2(20),
+위치 varchar2(20),
+primary key(극장번호)
+);
+
+create table 상영관(
+극장번호 number,
+상영관번호 number,
+영화제목 varchar2(50),
+가격 number,
+좌석수 number,
+primary key(극장번호,상영관번호),
+foreign key (극장번호) references 극장(극장번호)
+);
+
+create table 고객(
+고객번호 number,
+이름 varchar2(20),
+주소 varchar2(50),
+primary key(고객번호)
+);
+
+
+create table 예약(
+극장번호 number,
+상영관번호 number,
+고객번호 number,
+좌석번호 number,
+날짜 date,
+primary key(극장번호,상영관번호,고객번호),
+foreign key (극장번호,상영관번호) references 상영관(극장번호,상영관번호),
+foreign key (고객번호) references 고객(고객번호)
+);
+
+insert into 극장 values(1,'롯데','잠실');
+insert into 극장 values(2,'메가','강남');
+insert into 극장 values(3,'대한','잠실');
+
+insert into 상영관 values(1,1,'어려운 영화',15000,48);
+insert into 상영관 values(3,1,'멋진 영화',7500,120);
+insert into 상영관 values(3,2,'재밌는 영화',8000,110);
+
+insert into 고객 values(3,'홍길동','강남');
+insert into 고객 values(4,'김철수','잠실');
+insert into 고객 values(9,'박영희','강남');
+
+insert into 예약 values(3,2,3,15,'2014-09-01');
+insert into 예약 values(3,1,4,16,'2014-09-01');
+insert into 예약 values(1,1,9,48,'2014-09-01');
+
+select 극장이름, 위치 from 극장;
+select * from 극장 where 위치='잠실';
+
+select 이름 from 고객, 극장, 상영관, 예약
+where 고객.고객번호=예약.고객번호 and
+극장.극장번호= 상영관.극장번호 and
+상영관.상영관번호=예약.상영관번호 and
+상영관.극장번호=예약.극장번호 and
+고객.주소=극장.위치;
+
+-대한극장에서 상영된 영화제목을 출력
+select 영화제목 from 극장, 상영관
+where 극장.극장번호=상영관.극장번호 and
+극장이름='대한';
+
+-대한극장에서 영화를 본 고객의 이름을 출력
+select 이름 from 극장,

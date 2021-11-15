@@ -45,8 +45,9 @@ public class NewBookDAO {
 		return list;
 	}
 
-	public void addBook(int bookid, String bookname, String publisher, int price) {
+	public int addBook(NewBookVO b) {
 		String sql = "insert into book values(?, ?, ?, ?)";
+		int re=-1;
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 	
@@ -54,12 +55,11 @@ public class NewBookDAO {
 			Class.forName(driver);
 			conn= DriverManager.getConnection(url, user, pwd);
 			pstmt= conn.prepareStatement(sql);
-			pstmt.setInt(1, bookid);
-			pstmt.setString(2, bookname);
-			pstmt.setString(3, publisher);
-			pstmt.setInt(4, price);
-			
-			pstmt.executeUpdate();
+			pstmt.setInt(1, b.getBookid());
+			pstmt.setString(2, b.getBookname());
+			pstmt.setString(3, b.getPublisher());
+			pstmt.setInt(4, b.getPrice());			
+			re=pstmt.executeUpdate();
 		} catch (Exception e) {
 			System.out.println("예외발생: " + e.getMessage());
 
@@ -75,6 +75,8 @@ public class NewBookDAO {
 				System.out.println("예외발생: " + e2.getMessage());
 			}
 		}
+		
+		return re;
 
 	}
 }
