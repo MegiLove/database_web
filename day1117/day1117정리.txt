@@ -1,0 +1,298 @@
+숫자와 관련하여 오라클이 미리 만들어 놓은 함수들
+
+숫자 함수
+
+abs(숫자[숫자가 있는 칼럼|숫자가 있는 칼럼의 수식])
+==> 음수이던지 양수이던지 절대값을 반환하는 함수
+
+select abs(-78),abs(78) from dual;
+
+  ABS(-78)    ABS(78)
+---------- ----------
+        78         78
+        
+**모든 주문에 대하여 도서의 가격-주문가격을 출력
+select orderid,price-saleprice from book b, orders o where b.bookid=o.bookid;
+
+**도서의 가격과 주문가격의 차이가 가장 큰 값을 출력
+select max(abs(price-saleprice)) from book b, orders o where b.bookid=o.bookid;
+
+MAX(ABS(PRICE-SALEPRICE))
+-------------------------
+                     6000
+                     
+round(실수값,소수점위치)
+==> 실수값을 반올림하여 소수점 위치까지 출력하는 함수
+==> 소수점 위치가 1이면 소수점 첫번째 자리까지 표시하라는 의미
+==> 소수점 위치가 0이면 소수점 이하 표시하지 말고 정수만 출력하라는 의미(즉, 일의 자리까지 표시하라는 의미)
+==> 소수점 위치가 -1이면 일의 자리에서 반올림하여 십의 자리까지 표시하라는 의미
+
+	select round(4.875,1) from dual;
+	
+	ROUND(4.875,1)
+	--------------
+           4.9
+           
+           
+ 	select round(4.845,1) from dual;          
+           
+     ROUND(4.845,1)
+	--------------
+            4.8
+            
+            
+	 select round(4.845,0)from dual;          
+    
+    ROUND(4.845,0)
+	--------------
+             5       
+             
+    select round(6469,-1) from dual;
+           
+     ROUND(6469,-1)
+	--------------
+          6470      
+           
+           
+    select round(6469,-2) from dual;       
+           
+     ROUND(6469,-2)
+	--------------
+          6500      
+           
+      
+      select ename,dname,round((salary+comm)*0.5,-1) 보너스금액 from emp e, dept d where e.dno=d.dno and dname like '%개발%';   
+           
+      select name,round(sum(saleprice)/count(*),-2) 평균주문금액 from customer c,orders o where c.custid=o.custid group by name; 
+      
+      select round(56.789,0)from dual;
+      ROUND(56.789,0)
+	  ---------------
+             57
+      
+      
+      select floor(56.789) from dual;    
+           
+      FLOOR(56.789)
+	  -------------
+           56     
+        
+        
+           
+문자함수
+      
+replace(문자열,원래문자,바꿀문자)
+==> 문자열 데이터 중에서 특정 문자를 다른 문자로 변경할 때 사용한다
+
+
+select bookid, replace(bookname,'야구','농구')bookname, publisher, price from book;      
+      
+ update book100 set bookname=replace(bookname,'야구','농구') where bookname like '%야구%';    
+ 
+ 
+ 
+ length(문자열) ==>문자열의 길이를 반환
+ 
+ lengthb(문자열)==> 문자열의 바이트 길이를 반환
+ 
+ select length('김') from dual;
+ 
+ LENGTH('김')
+------------
+           1
+ 
+ select length('a') from dual;
+ 
+ LENGTH('A')
+-----------
+          1     
+ 
+  select lengthb('김') from dual;     
+  
+ LENGTHB('김')
+-------------
+            3     
+      
+   select lengthb('a') from dual;    
+   
+ LENGTHB('A')
+------------
+           1   
+           
+           
+select bookname, length(bookname) 글자수, lengthb(bookname) 바이트수 from book where publisher='굿스포츠';  
+      
+select bookname, publisher, length(bookname), price from book where length(publisher)<=3;  
+
+substr(문자열,시작위치,글자수)
+	==> 문자열데이터에서 시작위치에서부터 글자수만큼 잘라온다
+	
+select substr('hello oracle',3,3) from dual;    
+select substr('hello oracle',3,4) from dual;    
+select substr('hello oracle',3,5) from dual;  
+
+select substr(ename,1,1) "성" from emp;  
+
+select substr(ename,1,1) "성", count(*) "인원수" from emp group by substr(ename,1,1) order by count(*) desc,substr(ename,1,1);
+
+alter table emp add email varchar2(50);
+alter table emp add jumin varchar2(14);
+
+
+
+select e.eno,e.ename,d.dno,dname,m.ename,(e.salary+e.comm)*12*0.3 "특별 상여금" from emp e, emp m, dept d where e.mgr=m.eno and e.dno=d.dno and substr(e.jumin,8,1)=2 and dname like '%개발%' order by (e.salary+e.comm)*12*0.3 desc,e.ename;
+
+
+      
+instr(문자열, 찾을문자)     
+==> 문자열안에서 찾을 문자의 위치를 반환한다
+
+select instr('hello oracle','r') from dual; 
+
+INSTR('HELLOORACLE','R')
+------------------------
+                       8
+                       
+      
+select ename, substr(email,1,instr(email,'@')-1) "아이디" from emp;   
+
+select ename, to_char(sysdate,'yyyy')-(substr(jumin,1,2)+1900) from emp;
+
+select e.eno,e.ename,to_char(sysdate,'yyyy')-(substr(e.jumin,1,2)+1900) age,dname,dloc,(e.salary+e.comm)*12,m.ename from emp e, emp m, dept d where e.mgr= m.eno and d.dno=e.dno and substr(e.jumin,8,1)='2' and to_char(sysdate,'yyyy')-(substr(e.jumin,1,2)+1900)>=25 and dname like '%개발%' order by m.ename,e.ename; 
+
+update emp set salary= salary*1.1, comm=comm*1.1 where dno in(select dno from dept where dname like '%개발%') and to_char(sysdate,'yyyy')-(substr(jumin,1,2)+1900)>=25 and substr(jumin,8,1)='2';     
+
+
+update emp e1 set salary=(select avg(salary) from emp e2 where e1.dno=e2.dno), comm=(select avg(comm) from emp e2 where e1.dno=e2.dno) where dno in(select dno from dept where dname like '%개발%') and to_char(sysdate,'yyyy')-(substr(jumin,1,2)+1900)>=25 and substr(jumin,8,1)='2';
+      
+       
+update emp set salary=(select max(avg(salary)) from emp group by dno), comm=(select max(avg(comm)) from emp group by dno) where dno in(select dno from dept where dname like '%개발%') and to_char(sysdate,'yyyy')-(substr(jumin,1,2)+1900)>=25 and substr(jumin,8,1)='2';      
+
+lower(문자열)==> 문자열을 모두 소문자로 변환해주는 함수
+upper(문자열)==> 문자열을 모두 대문자로 변환해주는 함수
+
+select upper('Hello Korea') from dual;
+
+UPPER('HELLOKOREA')
+----------------------
+HELLO KOREA
+
+
+insert into customer values(8,'Tiger','대한민국 인천','010-1234-1234');
+insert into customer values(9,'tiger','대한민국 부산','010-2222-2222');
+insert into customer values(10,'TIGER','대한민국 전주','010-3333-3333');
+
+select * from customer where upper(name)='TIGER';
+
+
+
+ltrim(문자열)		==>문자열데이터의 왼쪽에 있는 공백을 제거한다
+rtrim(문자열)		==>문자열데이터의 오른쪽에 있는 공백을 제거한다
+trim(문자열)		==>문자열데이터의 왼쪽과 오른쪽에 있는 공백을 제거한다
+
+
+select '*' || '   hello   ' || '*' from dual;
+
+select '*' || ltrim('   hello   ') || '*' from dual;
+select '*' || rtrim('   hello   ') || '*' from dual;
+select '*' || trim('   hello   ') || '*' from dual;
+
+
+insert into customer values(11,' tiger','대한민국 강원도','010-3333-3333');
+insert into customer values(12,'TIGER ','대한민국 서울','010-4444-3333');
+insert into customer values(13,' Tiger ','대한민국 대구','010-5555-3333');
+
+select * from customer where trim(upper(name))='TIGER';
+
+lpad(컬럼, 자릿수, 문자)
+	==> 컬럼의 값을 자릿수만큼 잡아서 오른쪽 맞추어 출력하되 왼쪽 빈칸을 문자로 채워서 출력
+
+select lpad('hello',10,'@') from dual; 
+
+LPAD('HELLO',10,'@')
+--------------------
+@@@@@hello
+
+rpad(컬럼,자릿수,문자)
+	==> 컬럼의 값을 자릿수만큼 잡아서 왼쪽 맞추어 출력하되 오른쪽 빈칸을 문자로 채워서 출력
+
+select rpad('hello',10,'@') from dual; 
+
+RPAD('HELLO',10,'@')
+--------------------
+hello@@@@@
+
+
+select e.eno,e.ename,e.hirdate,(e.salary+e.comm)*12 "연봉",rpad(substr(e.jumin,1,8),14,'*') "jumin", substr(e.email,1,instr(e.email,'@')-1) "아이디" from emp e, emp m where e.mgr=m.eno and m.ename='김시아';
+
+
+select length('hello')from dual;
+
+
+
+select e.eno, e.ename, m.ename, d.dno, dname, substr(e.email,1,instr(e.email,'@')-1) "아이디" from emp e, emp m, dept d where e.mgr= m.eno and d.dno=e.dno and length(substr(e.email,1,instr(e.email,'@')-1))<8
+
+
+날짜, 시간 함수
+
+
+to_date(문자열, 형식지정문자)
+문자열을 Date으로 반환하는 함수
+
+to_char(날짜, 형식지정문자)
+날짜를 문자열로 반환하는 함수
+
+select sysdate from dual;
+
+select to_char(sysdate,'yyyy')from dual;
+select to_char(sysdate,'yyyy/mm')from dual;
+select to_char(sysdate,'mm')from dual;
+select to_char(sysdate,'yyyy/mm/dd hh24:mi:ss')from dual;
+
+select e.ename, e.hirdate, m.ename from emp e, emp m, dept d where e.mgr=m.eno and d.dno=e.dno and dname like '%개발%' and  to_char(e.hirdate,'yyyy')<=2020;
+
+select eno, ename, round((salary+comm)*12*0.2,-2) "상여금", dname from emp e, dept d where e.dno=d.dno and (to_char(sysdate,'yyyy')-to_char(hirdate, 'yyyy'))>=3;
+
+months_between(날짜1,날짜2)
+==> 두 날짜 사이의 개월수를 반환하는 함수이다
+	날짜1이 더 최근의 날짜여야 한다
+	
+select months_between(sysdate,'1995/07/29')from dual;
+
+select eno, ename, hirdate, months_between(sysdate, hirdate) "근무개월수" from emp order by 근무개월수 desc;
+
+select eno,ename,hirdate,d.dno,dname,floor(months_between(sysdate,hirdate)) "근무개월수" from emp e, dept d where d.dno=e.dno and months_between(sysdate,hirdate)>=24 and (dloc='판교' or dloc='서교동') order by floor(months_between(sysdate,hirdate)) desc;
+
+
+**날짜 사이의 연산이 가능하다
+
+select sysdate-1,sysdate,sysdate+1 from dual;  
+
+select to_date('1995/07/29','yyyy/mm/dd')+100 from dual;    
+
+update orders set orderdate= orderdate-365 where custid=(select custid from customer where name='박지성');
+update orders set orderdate= orderdate-730 where custid=(select custid from customer where name='추신수');
+
+
+select distinct name, phone, (select max(orderdate) from orders o2 where o1.custid=o2.custid) , floor(months_between(sysdate,(select max(orderdate) from orders o2 where o1.custid=o2.custid))) from customer c, orders o1 where c.custid=o1.custid and floor(months_between(sysdate,(select max(orderdate) from orders o2 where o1.custid=o2.custid)))>=6; 
+
+select e.eno, e.ename, e.hirdate, (e.salary+e.comm)*12, rpad(substr(e.jumin,1,8),14,'*') "jumin", substr(e.email,1,instr(e.email,'@')-1) "아이디" from emp e, emp m where e.mgr= m.eno and m.ename=? and months_between(sysdate, e.hirdate)>=?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      
+           
+           
