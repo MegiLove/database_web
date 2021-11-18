@@ -1,6 +1,6 @@
-<%@page import="com.sist.vo.EmpVO"%>
+<%@page import="com.sist.vo.BookVO"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="com.sist.dao.EmpDAO"%>
+<%@page import="com.sist.dao.BookDAO"%>
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
 <!DOCTYPE html>
@@ -16,12 +16,13 @@
 	</form>
 
 	<%
-	request.setCharacterEncoding("euc-kr");	
-	if (request.getParameter("dloc") != null) {
+	p
+
+			request.setCharacterEncoding("euc-kr");	
+			if (request.getParameter("dloc") != null) {
 		String dloc = request.getParameter("dloc");
-		EmpDAO dao = new EmpDAO();
-		ArrayList<EmpVO> list = dao.listEmp(dloc);
-		
+		BookDAO dao = new BookDAO();
+		ArrayList<BookVO> list = dao.listEmp(dloc);
 	%>
 	<table border="1" width="80%">
 		<tr>
@@ -34,7 +35,9 @@
 			<td>ºÎ¼­¸í</td>
 		</tr>
 		<%
-		for (EmpVO o : list) {
+		p
+
+				for (BookVO o : list) {
 		%>
 		<tr>
 			<td><%=o.getEno()%></td>

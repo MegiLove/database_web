@@ -1,8 +1,0 @@
-package com.sist.vo;
-
-public class Snippet {
-	select customer.custid, name, bookname, publisher, price, saleprice, orderdate
-	from book, orders, customer where book.bookid= orders.bookid and
-	orders.custid=customer.custid and name='¹ÚÁö¼º' order by price desc;
-}
-

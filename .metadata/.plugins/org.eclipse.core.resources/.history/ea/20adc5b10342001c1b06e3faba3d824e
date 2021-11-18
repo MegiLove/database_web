@@ -1,6 +1,0 @@
-package com.sist.vo;
-
-public class SumVO {
-	DeptVO d= new DeptVO();
-	EmpVO e= new EmpVO();
-}

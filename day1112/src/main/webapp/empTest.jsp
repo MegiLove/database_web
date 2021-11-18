@@ -1,5 +1,5 @@
 <%@page import="java.util.ArrayList"%>
-<%@page import="com.sist.dao.EmpDAO"%>
+<%@page import="com.sist.dao.BookDAO"%>
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
 <!DOCTYPE html>
@@ -15,13 +15,15 @@
 	<input type="submit" value="확인">
 	</form>
 	<%
-		request.setCharacterEncoding("euc-kr");
-		if(request.getParameter("name")!=null && request.getParameter("dloc")!=null){
-			String name= request.getParameter("name");
-			String dloc= request.getParameter("dloc");
-			EmpDAO dao= new EmpDAO();
-			ArrayList<String> list= dao.getEmpName(name,dloc);
-			%>
+	p
+
+			request.setCharacterEncoding("euc-kr");
+			if(request.getParameter("name")!=null && request.getParameter("dloc")!=null){
+		String name= request.getParameter("name");
+		String dloc= request.getParameter("dloc");
+		BookDAO dao= new BookDAO();
+		ArrayList<String> list= dao.getEmpName(name,dloc);
+	%>
 			<table border="1">
 			<tr>
 				<td>직원이름</td>
