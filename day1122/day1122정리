@@ -1,0 +1,606 @@
+인덱스 :  
+	검색이나 조건식에 자주 사용하는 컬럼에 대하여 색인표를 만드는 것을 말한다.
+	인덱스를 만들어 두면 검색시에 속도를 빠르게 할 수 있다.
+	
+	그러나 데이터양이 작을 때에는 속도가 빠른지 체감할 수 없어요.
+	데이터의 수정,삭제 빈번한 컬럼에 인덱스를 설정하게 되면 오히려 성능저하의 요인이 됩닏.
+	
+	인덱스를 만들고 난 다음
+	변경된 데이터가 있다면
+	다시 인덱스를 재구성 해 주어야 합니다.
+	
+** 인덱스를 만드는 방법
+	create index 인덱스이름 on 테이블명(칼럼명)
+	
+** 인덱스를 재 구성하는 방법
+	alter index 인덱스이름 rebuild
+
+** 인덱스를 삭제하는 방법	
+	drop index 인덱스이름
+	
+
+연습) customer의 name으로 인덱스를 생성 해 봅니다.
+create index idx_customer_name on customer(name);
+
+select * from customer where name = '윤석열';	
+	
+연습) 고객번호 6번의 이름을 '윤자바'로 수정
+update customer set name  = '윤자바' where custid = 6;
+	
+==> 이와 같이 인덱스를 만들어 둔 데이터에 수정이 있다면
+				오히려 검색속도를 떨어트릴 수 있어요!
+	
+연습) idx_customer_name을 재구성 해 봅니다.
+alter index idx_customer_name rebuild;	
+	
+select * from customer where name = '윤자바';		
+	
+** 인덱스가 효과를 발휘하려면
+			데이터 수정이 빈번하지 않아야 하고 
+			또, 인덱스를 설정한 칼럼의 같은 값의 종류가 많지 않아야 의미가 있어요.	
+			100만건의 데이터중에 "주소"컬럼의 값의
+			"서울","울산","광주" 세가지 밖에 없어요.
+			이럴때는 인덱스가 오히려 성능을 저하시키는 요인이 됩니다.
+			
+			이때에는 인덱스를 삭제하는 것이 좋아요.
+			
+연습)  idx_customer_name 인덱스를 삭제 해 봅니다.
+drop index  idx_customer_name;
+	
+	
+--------------------------------------------------------------------------------------------------------------------------------
+select custid, (select address from customer cs 
+								where cs.custid = od.custid) address, sum(saleprice) total 
+from orders od
+group by od.custid;
+
+==> 고객번호별로 총구매액과 주소를 출력
+	    주소를 출력하기 위하여 select  절에 상관서브쿼리를 이용하였습니다.
+	    
+	    
+--------------------------------------------------------------------------------------------------
+select cs.name, s 
+from ( select custid, avg(saleprice) s from orders group by custid  ) od, 
+customer cs	
+where cs.custid=od.custid;
+
+==> 고객이름별로 평균구매액을 출력
+	    이름은 customer테이블에 있고 구매금액은 orders있어
+	    고객번호별로 평균구매액을 구하는 것을 from절 서브쿼리 이용하였습니다.
+	    	
+	
+select name, ( select nvl(avg(saleprice),0) from orders o where o.custid = c.custid   ) from customer c;
+select  (select name from customer c where c.custid=o.custid),    avg(saleprice) from orders o group by custid;
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+select sum(saleprice) total
+from orders od
+where exists (select * from customer cs 
+								where custid <= 3 and cs.custid = od.custid);
+
+==> 고객번호가 3이하인 고객들의 총구매액
+
+select sum(saleprice)
+from orders 
+where custid <= 3;
+	
+-----------------------------------------------------------------------------------------------------------------------------------------------
+뷰의 장점과 단점
+
+==> 복잡한 검색을 뷰를 이용하면 간편하게 사용할 수 있어요.
+==> 보안유지상 사용별로 접근권한을 다르게 설정할 수 있어요.
+
+==> 사용자별로 접근권한을  다르게 설정하여 관리하는 것이 번거로울 수 있어요
+==> 뷰의 종류에 따라 with read only, with check option의 등의 설정및 관리 필요하다.
+
+---------------------------------------------------------------------------------------------------------------------------------
+1) 판매가격이 20000원 이상인 도서의 도서번호, 도서이름, 고객이름, 출판사, 판매가격을 보여주는 
+highorders 뷰를 생성하시오.
+
+create view highorders as 
+select b.bookid, bookname, name, publisher, saleprice
+from book b, customer c, orders o
+where b.bookid = o.bookid and 
+c.custid = o.custid and
+saleprice >= 20000;
+
+2) 생성한 뷰를 이용하여 판매된 도서의 이름과 고객의 이름을 출력하는 sql을 작성하시오.
+
+select bookname, name from highorders;
+
+
+3) highorders뷰를 변경하고자 한다. 판매가격 속성을 삭제하는 명령을 수행하시오.  삭제후
+		2번 sql을 다시 실행하시오.
+		
+alter view highorders drop column saleprice;
+
+** 테이블의 칼럼 삭제
+alter table customer100 drop column phone;
+
+==> view는 실제로 존재하는 테이블이 아니기 때문에 
+				alter명령어로 수정할 수 없어요.
+				수정하려면
+				view삭제한 후 
+				다시 원하는대로 view를 생성 해 줍니다.
+
+
+** 뷰를 삭제하기
+drop view 뷰이름
+
+drop view highorders;				
+create view highorders as 
+select b.bookid, bookname, name, publisher
+from book b, customer c, orders o
+where b.bookid = o.bookid and 
+c.custid = o.custid and
+saleprice >= 20000;
+
+select bookname, name from highorders;
+
+---------------------------------------------------------------------------------------------------
+뷰를 수정하기
+
+create or replace view 뷰이름
+as
+select ~
+
+==> 뷰이름이 없으면 생성해주고
+	   있으면 수정 해 줍니다.
+	   
+	   
+create or replace view highorders as 
+select b.bookid, bookname, name, publisher, saleprice
+from book b, customer c, orders o
+where b.bookid = o.bookid and 
+c.custid = o.custid and
+saleprice >= 30000;
+
+-------------------------------------------------------------------------------------------------------------
+
+1) 팀장이 없는 직원의 이름을 출력
+		select ename from emp where mgr = null;
+		select ename from emp where mgr is null;
+		select ename from emp where mgr is not null;
+		
+2) 사원의 이름과 부서의 이름을 출력(조인/스칼라 부속질의)
+	select ename,dname from emp e, dept d where e.dno = d.dno;
+	select ename, ( select dname from dept d where e.dno = d.dno    ) dname from emp e;
+
+
+3) '서교동'에 근무하는 사원의 이름을 출력(조인/인라인뷰/중첩질의/exists)
+select ename from emp e, dept d where e.dno = d.dno and dloc = '서교동';
+select ename from emp e, ( select * from dept where dloc='서교동'    ) d where e.dno = d.dno; 
+select ename from emp where dno in (select dno from dept where dloc='서교동');
+select ename from emp e where exists (select dno from dept d where dloc='서교동' and d.dno = e.dno );	
+	
+4) 평균보다 급여가 많은 직원의 이름을 출력
+select ename from emp where salary > (select avg(salary) from emp);
+
+
+5) 자기 부서의 평균보다 급여가 많은 직원의 이름을 출력(상관 부속질의 사용)
+select ename from emp e1 where salary > ( select avg(salary) from emp e2 where e1.dno = e2.dno);
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+오라클안에서도 프로그램을 만들수 있어요
+	==> PL/SQL
+			Procedual Language Structured Query Language
+			
+	==> 오라클 전용 프로그램 언어
+	
+-----------------------------------------------------------------------------------------------------
+
+PL/SQL을 이용하여 자바의 "메소드"같은 것을 만들 수 있어요.
+	==> "프로시저"	
+
+-----------------------------------------------------------------------------------------------------
+
+** 프로시저 만들기
+create procedure 프로시저이름(
+	변수이름 모드 자료형,
+	변수이름 모드 자료형,
+	..
+)
+as
+	지역변수(들)
+begin
+	프로시저가 해야할 sql명령어(들)
+end;
+
+
+모드의 종류
+	in						입력용
+	out					출력용
+
+
+
+
+-------------------------------------------------------------
+연습) 도서번호, 도서명, 출판사, 가격을 매개변수로 전달받아 도서를 추가하는 프로시저를 만들고 
+				프로시저를 호출하여 insert를 수행 해 봅시다.
+				
+create or replace procedure InsertBook(
+	myBookID in book.bookid%TYPE,
+	myBookName in book.bookname%TYPE,
+	myPublisher in book.publisher%TYPE,
+	myPrice in book.price %TYPE
+)
+as
+begin
+	insert into book values(myBookID,myBookName,myPublisher,myPrice);
+end;
+/
+
+경고: 컴파일 오류와 함께 프로시저가 생성되었습니다.
+
+show errors;
+9/1      PL/SQL: SQL Statement ignored
+9/64     PL/SQL: ORA-00917: 누락된 콤마
+
+
+--------------------------------------------------------------------------------------------
+연습) 프로시저를 호출하여 insert를 수행 해 봅시다.
+
+exec 프로시저이름(값1,값2,...)
+
+exec InsertBook(15, '재미있는 pl/sql', '쌍용미디어','30000');
+
+-------------------------------------------------------------------------------------------------
+
+연습) 도서번호와 가격을 매개변수로 전달받아 
+				해당 도서의 가격을 수정하는 프로시저를 만들고 호출 해 봅니다.
+				
+		완성하면 "3"		
+
+create procedure UpdatePrice(
+	myBookID in book.bookid%TYPE,
+	myPrice in book.price%TYPE
+)
+as
+begin	
+	update book set price=myPrice where bookid = myBookID;
+end;
+/
+
+
+ 연습) 도서번호를 매개변수로 전달받아 해당도서를 삭제하는 프로시저를 만들고 
+ 					호출 해 봅니다.
+ 					
+ create or replace procedure DeleteBook(
+ 	myBookID in book.bookid%TYPE
+ )
+ as
+ begin
+ 	delete book where bookid = myBookID;
+ end;
+ /
+
+
+** PL/SQL에서도 제어문을 사용할 수 있어요.
+조건에 따라 실행할 SQL를 선택하도록 할 수 있습니다.
+
+연습) 도서번호,도서명,출판사,가격을 매개변수로 전달받아 
+				해당도서가 이미 있다면 도서의 가격을 수정하고 
+				그렇지 않다면 도서를 추가하는 프로시저를 생성하고 호출 해 봅니다.
+				
+create or replace procedure BookInsertOrUpdate(
+	myBookID book.bookid%TYPE,
+	myBookName book.bookname%TYPE,
+	myPublisher book.publisher%TYPE,
+	myPrice book.price%TYPE
+)
+as
+	mycount number;
+begin
+	select count(*) into mycount from book where bookname = myBookName;
+	if mycount != 0 then
+		update book set price = myPrice where bookname = myBookName;
+	else
+		insert into book values(myBookID,myBookName,myPublisher,myPrice);
+	end if;
+end;
+/
+
+
+exec BookInsertOrUpdate(13, '재미있는 오라클', '쌍용미디어', 40000);
+exec BookInsertOrUpdate(16, '즐거운 JSP', '쌍용미디어', 35000);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+** 반환값이 있는 프로시저 만들기
+ create procedure 프로시저이름
+ (
+ 	변수명 out 자료형
+ )
+as
+begin
+	select 컬럼명 into 변수명 from ~~ 
+end;
+/
+
+==> 검색한 결과를 변수에 담아서 반환 해 줍니다.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+** 반환값이 있는 프로시저 호출하기 
+(변수를 선언하고, 프로시저를 호출하고 반환값을 확인(출력)하기 위한 프로그램이 필요해요)
+PL/SQL 구문이 필요해요!
+
+set serveroutput on;										<-------    화면에 결과를 출력하기 위해서 필요한 설정
+
+
+PL/SQL의 기본 구조
+declare
+	변수명 자료형;
+begin
+	프로시저호출(변수명);								<--------- 프로시저에서 전달하는 변수에 결과를 담아줍니다.
+	dbms_output.put_line(변수명)				<--------- console에 출력하는 명령
+end;
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+연습) 도서의 평균가격을 반환하는 프로시저를 생성하고 호출해 봅시다.
+
+create or replace procedure AveragePrice(
+	AverageVal out number
+)
+as
+begin
+	select avg(price) into AverageVal from book where price is not null;
+end;
+/
+
+
+set serveroutput on;					<--------------- cmd창을 닫기 전까지 한번만 동작시켜 두면 됩니다.
+
+declare
+	result number;
+begin
+	AveragePrice(result);
+	dbms_output.put_line('책값 평균' || result);
+end;
+/
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+연습) 고객명을 매개변수로 전달받아 
+				그 고객이 주문한 총주문건수, 총주문액을 반환하는 프로시저를 만들고 
+				호출하여 결과를 출력 해 봅니다.
+
+create or replace procedure getCustomerOrders(
+	cname in customer.name%TYPE,
+	cnt out number,
+	tot out number
+)
+as
+begin
+	select count(*) , sum(saleprice) into  cnt, tot from orders where 
+		custid = (select custid from customer where name = cname);
+end;
+/
+
+---------------------------------------------------------------------------------
+declare
+	cnt number;
+	tot number;
+begin
+	getCustomerOrders('박지성', cnt, tot);
+	dbms_output.put_line('총구매건수:' || cnt || ',총구매금액:' || tot);
+end;
+/
+
+--------------------------------------------------------------------------------
+
+반환값이 있는 프로시저 호출하는 또 다른 방법
+
+variable 변수명 자료형;
+exec 프로시저이름(:변수명)
+print 변수명
+------------------------------------------------------------------------------------
+
+variable cnt number;
+variable tot number;
+exec getCustomerOrders('박지성', :cnt, :tot);
+print cnt;
+print tot;
+
+--------------------------------------------------------------------------------------------------------------------------
+
+연습) 고객번호, 이름, 주소, 전화번호를 매개변수로 전달받아 
+				insert를 수행하는 프로시저를 생성하고 호출해 봅니다.
+				
+create or replace procedure insertCustomer(
+	pid customer.custid%type,
+	pname customer.name%type,
+	paddr customer.address%type,
+	pphone customer.phone%type
+)
+as
+begin
+	insert into customer values(pid,pname,paddr,pphone);
+end;
+/
+	
+exec insertCustomer(16, 'kim', '서울', '010-1111-1111');
+			
+연습) 고객번호, 이름, 주소, 전화번호를 매개변수로 전달받아 
+			해당고객의 정보를 수정하는 프로시저를 만들고 호출해 봅니다.
+
+create or replace procedure updateCustomer(
+	pid customer.custid%type,
+	pname customer.name%type,
+	paddr customer.address%type,
+	pphone customer.phone%type
+)
+as
+begin
+	update customer set name=pname,address=paddr,phone=pphone where custid=pid;
+end;
+/
+
+exec updateCustomer(6, '윤석열', '대한민국 제주', '010-0000-0000');
+
+연습) 고객번호를 매개변수로 전달받아 해당 고객을 삭제하는 
+			프로시저를 만들고 호출 해 봅니다.
+
+create or replace procedure deleteCustomer(
+	pid customer.custid%type
+)
+as 
+begin
+	delete customer where custid = pid;
+end;
+/			
+
+exec deleteCustomer(16);	
+
+
+		
+연습) 고객번호를 매개변수로 전달받아 
+				해당 고객의 이름과 전화, 주소를 반환하는 프로시저를 만들고 호츨해 봅니다.
+				
+create or replace procedure getCustomer(
+	pid in customer.custid%type,
+	pname out customer.name%type,
+	pphone out customer.phone%type,
+	paddr out customer.address%type
+)
+as
+begin
+	select name,phone, address into pname,pphone, paddr from customer 
+	where custid = pid;
+end;
+/
+
+----------------------------------------------------------------------------------------------------------
+variable name varchar2;
+variable phone varchar2;
+variable addr varchar2;
+
+
+variable name varchar2;
+exec getCustomer(2, :name, :phone, :addr);
+
+
+variable name customer.name%type;
+exec getCustomer(2, :name);
+
+==> variable로는 테이블의 컬럼의 자료형과 일치시키기 위한 
+				customer.name%type 이 동작하지 않아 
+				컬럼의 값을 그대로 반화해야 하는 경우에는 
+				pl/sql 형태로 호출해야 합니다.
+				
+----------------------------------------------------------------------------------------------------				
+declare
+	name customer.name%type;
+	phone customer.phone%type;
+	addr customer.address%type;
+begin
+	getCustomer(1,name, phone, addr);
+	dbms_output.put_line(name || phone || addr);
+end;
+/
+
+---------------------------------------------------------------------------------------------------------------------
+
+cursor의 사용
+==> 프로시저 안에서 select한 결과가 여러건일 때에 사용합니다.
+
+** cursor를 사용하는 방법
+
+create procedure 프로시저이름(
+	매개변수(들)
+)
+as
+	변수1 자료형;
+	변수2 자료형;
+	..
+	cursor 커서이름 is select  컬럼1, 컬럼2, from ~~;									<----- 커서를 정의
+begin
+	open  커서이름															<----  커서에 정의된 select문을 실행
+	loop																			<----  반복문을 수행
+		fetch 커서이름  into 변수1, 변수2, ..				<----  커서의 내용을 한행씩 변수에 담는다
+		exit when 커서이름%NOTFOUND					<----  커서에 더이상 읽어올 레코드가 없다면 반복문을 탈출
+		처리할 문장(들)
+	end loop;
+	close 커서이름;
+end;
+/
+
+-------------------------------------------------------------------------------------
+연습) orders 테이블로 부터 총 판매이익을 계산하여 출력하는 프로시저를 만들고 
+				호출해 봅시다. 
+				판매금액이 30000원 이상이면 10%이익이고
+				그렇지 않으면 5%가 이익입니다.
+				
+				모든 주문에 대하여 이익금을 계산하고 
+				그 이익금에 총합을 누적하여 출력
+				
+				
+				select saleprice from orders;
+				
+set serveroutput on;
+create or replace procedure Interest
+as 
+	cursor InterestCursor is select saleprice from orders;
+	price number;
+	total number;
+begin
+	total := 0;
+	open InterestCursor;
+	loop
+		fetch InterestCursor into price;
+		exit when InterestCursor%NOTFOUND;
+		if price >= 30000 then
+			total := total + price * 0.1;
+		else
+			total := total + price * 0.05;
+		end if;
+	end loop;
+	close InterestCursor;
+	dbms_output.put_line('전체이익금액 = ' || total);
+end;
+/				
+
+exec Interest
+
+
+-------------------------------------------------------------------------------------------------
+연습) 고객이름을 매개변수로 전달받아 
+						그 고객이 주문한 
+						모든 도서명, 도서가격, 구매가격,구매일을 출력하는 프로시저를 만들고 호출 해 봅니다.
+						
+create or replace procedure printCustomer(
+	pname customer.name%type
+)
+as 
+	pbookname book.bookname%type;
+	pprice book.price%type;
+	psaleprice orders.saleprice%type;
+	porderdate orders.orderdate%type;
+	cursor c is select bookname, price, saleprice, orderdate 
+			from customer c, book b, orders o
+			where c.custid = o.custid and 
+			b.bookid = o.bookid and 
+			name = pname;
+begin
+	open c;
+	loop
+		fetch c into pbookname, pprice, psaleprice, porderdate ;
+		exit when c%NOTFOUND;
+		dbms_output.put_line(pbookname||' '|| pprice || ' ' || psaleprice || ' ' ||porderdate);
+	end loop;
+	close c;
+end;
+/
+
+
+
+select bookname, price, saleprice, orderdate 
+from customer c, book b, orders o
+where c.custid = o.custid and 
+b.bookid = o.bookid and 
+name = '박지성';
+
+	
