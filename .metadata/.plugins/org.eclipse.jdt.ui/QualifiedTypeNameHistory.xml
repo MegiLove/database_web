@@ -5,19 +5,21 @@
     <fullyQualifiedTypeName name="com.sist.vo.SumVO"/>
     <fullyQualifiedTypeName name="com.sist.vo.NewBookVO"/>
     <fullyQualifiedTypeName name="com.sist.vo.OrdersVO"/>
-    <fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
     <fullyQualifiedTypeName name="com.sist.vo.CustomerVO"/>
     <fullyQualifiedTypeName name="com.sist.vo.TheaterVO"/>
     <fullyQualifiedTypeName name="com.sist.vo.TicketVO"/>
-    <fullyQualifiedTypeName name="java.util.Date"/>
     <fullyQualifiedTypeName name="com.sist.vo.EmpVO"/>
     <fullyQualifiedTypeName name="com.sist.vo.BookVO"/>
-    <fullyQualifiedTypeName name="java.util.ArrayList"/>
     <fullyQualifiedTypeName name="com.sist.exam.BookList"/>
-    <fullyQualifiedTypeName name="java.sql.Connection"/>
     <fullyQualifiedTypeName name="java.sql.DriverManager"/>
     <fullyQualifiedTypeName name="java.beans.Statement"/>
+    <fullyQualifiedTypeName name="org.apache.catalina.filters.ExpiresFilter.XServletOutputStream"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
     <fullyQualifiedTypeName name="java.sql.Statement"/>
     <fullyQualifiedTypeName name="java.sql.ResultSet"/>
-    <fullyQualifiedTypeName name="org.apache.catalina.filters.ExpiresFilter.XServletOutputStream"/>
+    <fullyQualifiedTypeName name="com.sist.vo.PossibleReservationRoomVO"/>
+    <fullyQualifiedTypeName name="java.sql.Connection"/>
+    <fullyQualifiedTypeName name="java.util.Date"/>
+    <fullyQualifiedTypeName name="com.sist.vo.ReservationVO"/>
+    <fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
 </qualifiedTypeNameHistroy>
