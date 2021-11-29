@@ -1,0 +1,102 @@
+예약번호 발행을 위하여 다음에 테이블을 임시로 만들어 실험 해 봅시다.
+
+create table test(no number,title varchar2(20));
+
+insert into test values(20211128100, 'test');
+insert into test values(2021112910, 'test');
+insert into test values(2021112911, 'test');
+insert into test values(2021112912, 'test');
+
+no중에 날짜를 제외한 번호를 검색 해 봅니다.(단, 오늘날짜에 해당하는 것만 뽑아옵니다.)
+select substr(no,9) from test where substr(no,1,8) = to_char(sysdate,'yyyymmdd');
+
+이중에 제일 큰값을 뽑아요
+select nvl(max(substr(no,9)), 0) + 1 from test where substr(no,1,8) = to_char(sysdate,'yyyymmdd');
+
+
+예약번호를 문자자료형으로 수정하겠습니다.
+alter table reservation modify reservation_no varchar2(15);
+
+SQL> alter table reservation modify reservation_no varchar2(15);
+alter table reservation modify reservation_no varchar2(15)
+                               *
+1행에 오류:
+ORA-02267: 열의 데이터 유형이 참조 열의 데이터 유형과 일치하지 않습니다
+
+우리는 예약테이블의 예약번호를 varchar2로 자료형을 수정하고 싶은데
+결재테이블이 예약테이블을 참조 있어서 바로 수정 할 수 없어요.
+
+그래서 참조키를 잠시 삭제한 후 에 수정하고 
+다시 참조키를 설정하도록 하겠습니다.
+
+사용자의 제약의 대한 정보를 갖고 있는 데이터사전
+==> user_constraints
+
+select constraint_name, constraint_type, table_name 
+from user_constraints where table_name = 'PAYMENT';
+
+** 주의) sql명령어 자체에 테이블이름에는 대소문자를 구별하지 않아요
+그런 value로써 테이블이름은 모두 대문자로 들어가 있으며 대소문자를 구별합니다.
+
+
+CONSTRAINT_NAME CONSTRAINT_TYPE      TABLE_NAME
+--------------- -------------------- ----------
+SYS_C008535     R                    PAYMENT
+SYS_C008536     R                    PAYMENT
+SYS_C008506     C                    PAYMENT
+SYS_C008507     C                    PAYMENT
+SYS_C008508     C                    PAYMENT
+SYS_C008509     P                    PAYMENT
+
+CONSTRAINT_TYPE이 R인 것이 참조키 입니다.
+이것을 모두 지우고
+예약테이블의 예약번호 칼럼의자료형을 수정한후에 
+다시 참조키를 설정하겠습니다.
+
+제약을 삭제하는 명령
+alter table 테이블이름 drop constraint 제약명;
+
+alter table payment drop constraint SYS_C008535;
+alter table payment drop constraint SYS_C008536;
+
+-----------------------------------------------------------------------
+alter table reservation modify reservation_no varchar2(15);
+alter table payment modify reservation_no varchar2(15);
+
+-------------------------------------------------------------------------------
+다시 payment테이블에 참조키를 설정합니다.
+
+alter table 테이블이름 add constraint  제약이름 foreign key(칼럼이름) 
+references 부모테이블(칼럼이름);
+
+alter table payment add constraint fk_payment_reservation_no 
+foreign key(reservation_no) references reservation(reservation_no);
+
+alter table payment add constraint fk_payment_type_code 
+foreign key(payment_type_code) references payment_type(payment_type_code);
+
+
+-----------------------------------------------------------------------------------------------------------
+
+** 프로젝트를 수행하다보면
+		데이블의 구조를 수정할 일이 빈번합니다.
+		
+이때 모든 테이블을 삭제하고 다시 모델링한 결과로 테이블을 만들 수도 있고
+	(이때는 반드시 자식테이블을 먼저 삭제해야 합니다.)
+혹은 관련 있는 데이블만 DDL명령어로 수정할 수 있어요.
+	이때는 참조되고 있는 자식테이블이 있다면 참조키를 삭제한 후에 수정하고 
+	다시 참조키를 설정합니다.
+	
+- 참조키를 삭제하려면 user_constraints 테이블을 통하여 제약명을 확인합니다.
+		alter table 테이블이름 drop constraint 제약이름;
+- 참조키를 설정하려면
+		alter table 테이블이름 add constraint 제약이름 foreign key(컬럼이름) 부모테이름(칼럼이름);
+
+
+
+
+select nvl(max(substr(reservation_no,9)), 0) + 1 from reservation 
+where substr(eservation_no,1,8) = to_char(sysdate,'yyyymmdd');
+
+
+
